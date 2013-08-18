@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 )
 
 func main() {
@@ -10,5 +11,6 @@ func main() {
 		log.Fatal("Failed to load static files, ", err.Error())
 	}
 
-	log.Fatal("Application not finished!")
+	http.HandleFunc("/", serveStatic)
+	http.ListenAndServe(":80", nil)
 }

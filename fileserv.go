@@ -2,8 +2,11 @@ package main
 
 import (
 	"bytes"
+	"log"
+	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 var files map[string][]byte
@@ -30,8 +33,27 @@ func loadStaticFile(path string, info os.FileInfo, err error) error {
 			return err
 		}
 
-		files[path] = buf.Bytes()
+		files["/"+strings.Replace(path, "\\", "/", -1)] = buf.Bytes()
 	}
 
 	return nil
+}
+
+func serveStatic(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+	if path == "/" {
+		path = "/static/index.html"
+	}
+
+	source, ok := files[path]
+	if ok {
+		_, err := w.Write(source)
+		if err != nil {
+			http.Error(w, "error getting file", http.StatusInternalServerError)
+			log.Println("File request failed: ", err)
+		}
+	} else {
+		log.Println("Invalid Static Request: ", r.URL.Path)
+		http.NotFound(w, r)
+	}
 }
