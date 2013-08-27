@@ -16,6 +16,21 @@ var fileChange map[string]time.Time
 func loadStatic() error {
 	files = make(map[string][]byte)
 	fileChange = make(map[string]time.Time)
+
+	jsBuf := bytes.NewBuffer([]byte{})
+	jsChange := new(time.Time)
+	loadJsFileTemp := func(path string, info os.FileInfo, err error) error {
+		return loadJsFile(jsBuf, jsChange, path, info, err)
+	}
+
+	err := filepath.Walk("js", loadJsFileTemp)
+	if err != nil {
+		return err
+	}
+
+	files["/page.js"] = jsBuf.Bytes()
+	fileChange["/page.js"] = *jsChange
+
 	return filepath.Walk("static", loadStaticFile)
 }
 
@@ -39,6 +54,36 @@ func loadStaticFile(path string, info os.FileInfo, err error) error {
 		fileID := "/" + strings.Replace(path, "\\", "/", -1)
 		files[fileID] = buf.Bytes()
 		fileChange[fileID] = info.ModTime()
+	}
+
+	return nil
+}
+
+func loadJsFile(buf *bytes.Buffer, jsChange *time.Time,
+	path string, info os.FileInfo, err error) error {
+	if err != nil {
+		return err
+	}
+
+	if info.Mode().IsRegular() {
+		f, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+
+		_, err = buf.ReadFrom(f)
+		if err != nil {
+			return err
+		}
+
+		_, err = buf.WriteString("\r\n")
+		if err != nil {
+			return err
+		}
+
+		if jsChange.Before(info.ModTime()) {
+			*jsChange = info.ModTime()
+		}
 	}
 
 	return nil
