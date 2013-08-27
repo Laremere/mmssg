@@ -1,6 +1,7 @@
 package main
 
 import (
+	"code.google.com/p/go.net/websocket"
 	"log"
 	"net/http"
 )
@@ -12,5 +13,7 @@ func main() {
 	}
 
 	http.HandleFunc("/", serveStatic)
+	http.Handle("/sock/", websocket.Handler(handleUser))
+	log.Println("Starting Server")
 	http.ListenAndServe(":80", nil)
 }

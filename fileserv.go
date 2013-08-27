@@ -7,12 +7,15 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 var files map[string][]byte
+var fileChange map[string]time.Time
 
 func loadStatic() error {
 	files = make(map[string][]byte)
+	fileChange = make(map[string]time.Time)
 	return filepath.Walk("static", loadStaticFile)
 }
 
@@ -33,7 +36,9 @@ func loadStaticFile(path string, info os.FileInfo, err error) error {
 			return err
 		}
 
-		files["/"+strings.Replace(path, "\\", "/", -1)] = buf.Bytes()
+		fileID := "/" + strings.Replace(path, "\\", "/", -1)
+		files[fileID] = buf.Bytes()
+		fileChange[fileID] = info.ModTime()
 	}
 
 	return nil
@@ -47,11 +52,7 @@ func serveStatic(w http.ResponseWriter, r *http.Request) {
 
 	source, ok := files[path]
 	if ok {
-		_, err := w.Write(source)
-		if err != nil {
-			http.Error(w, "error getting file", http.StatusInternalServerError)
-			log.Println("File request failed: ", err)
-		}
+		http.ServeContent(w, r, path, fileChange[path], bytes.NewReader(source))
 	} else {
 		log.Println("Invalid Static Request: ", r.URL.Path)
 		http.NotFound(w, r)
