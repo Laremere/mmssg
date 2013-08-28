@@ -3,21 +3,17 @@
 	<head>
 		<title>Massively Multiplayer Single Screen Game</title>
 		<script src="page.js"></script>
+		<link rel="stylesheet" type="text/css" href="static/style.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+		<meta name="apple-mobile-web-app-capable" content="yes"/>
 	</head>
 	<body>
-		<form data-bind="submit: send">
-			Message: <input data-bind="value: message"/>
-			<br/>
-			<button type="submit">Send</button>
-		</form>
-			<span data-bind="foreach: result">
-				<span data-bind="text: $data"></span><br/>
-			</span>
-		<p>
-		</p>
-
+		<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+		  <circle id="outer" cx="0" cy="0" r="50" fill="grey"/>
+		  <circle id="inner" cx="0" cy="0" r="10" fill="black"/>
+		</svg>
 	<script>
-		ko.applyBindings(new newViewModel());
+		$(document).ready(pageReady)
 	</script>
 	</body>
 </html>

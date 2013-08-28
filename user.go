@@ -39,10 +39,7 @@ func (u *user) read() {
 		}
 
 		log.Println("Message:", string(buf[:num]))
-		_, err = u.conn.Write(buf[:num])
-		if err != nil {
-			break
-		}
 	}
 	log.Println("Err reading websocket: ", err.Error())
+	u.close()
 }
