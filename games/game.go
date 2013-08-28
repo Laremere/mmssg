@@ -3,10 +3,7 @@ package game
 type NewGame func() Game
 
 type Game interface {
-	UserAdd(id int)
-	UserDrop(id int)
-	UserUpdate(id int, vx, vy float64)
-	UserAction(id int)
+	UserEvent(event UserEvent)
 	Update() string
 }
 
@@ -18,3 +15,22 @@ func Register(name string, initialize NewGame) {
 }
 
 var Games map[string]NewGame
+
+type UserEvent interface{}
+
+type UserAddEvent struct {
+	Id int
+}
+
+type UserDropEvent struct {
+	Id int
+}
+
+type UserMoveEvent struct {
+	Id   int
+	X, Y float64
+}
+
+type UserActionEvent struct {
+	Id int
+}

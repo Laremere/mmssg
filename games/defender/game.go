@@ -2,6 +2,7 @@ package defender
 
 import (
 	"github.com/laremere/mmssg/games"
+	"log"
 )
 
 func init() {
@@ -15,8 +16,14 @@ func NewGame() game.Game {
 type defender struct {
 }
 
-func (d *defender) UserAdd(id int)                    {}
-func (d *defender) UserDrop(id int)                   {}
-func (d *defender) UserUpdate(id int, vx, vy float64) {}
-func (d *defender) UserAction(id int)                 {}
-func (d *defender) Update() string                    { return "" }
+func (d *defender) UserEvent(event game.UserEvent) {
+	switch event := event.(type) {
+	case *game.UserMoveEvent:
+	case *game.UserAddEvent:
+		log.Println("defender user added: ", event)
+	case *game.UserDropEvent:
+	default:
+		log.Fatal("Unhandled user event type!")
+	}
+}
+func (d *defender) Update() string { return "" }

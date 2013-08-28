@@ -19,6 +19,7 @@ func main() {
 	http.HandleFunc("/", serveStatic)
 	http.Handle("/sock/", websocket.Handler(handleUser))
 	log.Println("Starting Server")
+	go genUserIds()
 	go http.ListenAndServe(":80", nil)
 	go main2()
 	wde.Run()
@@ -35,11 +36,18 @@ func main2() {
 	log.Println("Created window")
 	go eventHandler(w)
 
+	userEventRequest := make(chan bool)
+	userEventResult := make(chan []game.UserEvent)
+	go userEventCollector(userEventRequest, userEventResult)
+
 	active := game.Games["defender"]()
 	for {
 		goalTime := time.Now().Add(refreshRate)
+		userEventRequest <- true
+		for _, event := range <-userEventResult {
+			active.UserEvent(event)
+		}
 		active.Update()
-		log.Println("updated")
 		if time.Now().Before(goalTime) {
 			time.Sleep(goalTime.Sub(time.Now()))
 		}
