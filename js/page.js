@@ -34,7 +34,7 @@ function pageReady(){
 	    $("#inner").attr("cx", width / 2 + x * minDim / 50)
 	    $("#inner").attr("cy", height / 2 + y * minDim / 50)
 	    $("#inner").attr("r", minDim / 10)
-	    sock.send(x / 20 + " " + y / 20)
+	    sock.send("move " + x / 20 + " " + y / 20 + ";")
 	}
 
 	window.addEventListener("MozOrientation", function(orientData){

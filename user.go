@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"code.google.com/p/go.net/websocket"
+	"io"
 	"log"
 )
 
@@ -22,6 +24,7 @@ func handleUser(c *websocket.Conn) {
 	if err != nil {
 		log.Println("Err closing websocket: ", err.Error())
 	}
+	log.Println("User disconnected: ", c.RemoteAddr())
 }
 
 func (u *user) close() {
@@ -30,16 +33,18 @@ func (u *user) close() {
 
 func (u *user) read() {
 	var err error
-	buf := make([]byte, 50)
+	var command string
+	buf := bufio.NewReader(u.conn)
 	for {
-		var num int
-		num, err = u.conn.Read(buf)
+		command, err = buf.ReadString(byte(';'))
 		if err != nil {
 			break
 		}
 
-		log.Println("Message:", string(buf[:num]))
+		log.Println("Message:", command)
 	}
-	log.Println("Err reading websocket: ", err.Error())
+	if err != io.EOF {
+		log.Println("Err reading websocket: ", err.Error())
+	}
 	u.close()
 }
